@@ -8,7 +8,7 @@ void parallel_for();
 void parallel_section();
 void parallel_critical();
 void parallel_atomic();
-
+void parallel_for_schedule_static();
 
 int main() {
 
@@ -26,9 +26,16 @@ int main() {
     /**/
 
     /*  Comparar critical con atomic*/
-    parallel_critical();
-    parallel_atomic();
+    //parallel_critical();
+    //parallel_atomic();
     /*  Los resultados indican claramente que es más rápido utilizar atomic en vez de critical*/
+
+    /*
+     * Se utiliza la claúsula schedule (planificación) con static (divide las iteraciones del bucle en bloques de tamaño fijo)
+     * y chunk (cantidad de iteraciones que ejecutará cada hilo
+     */
+    parallel_for_schedule_static();
+    /**/
 
 }
 
@@ -143,4 +150,18 @@ void parallel_atomic(){
     }
     r = clock() - r;    //Calculamos el tiempo
     std:: cout << "j = " << j << " time = " << r << std::endl;
+}
+
+void parallel_for_schedule_static(){
+
+    long j = 0;
+    int chunk = 10;
+#pragma omp parallel for schedule(static ,chunk)
+    for(int i=0; i<80; i++){
+#pragma omp atomic
+        j++;
+    }
+
+    std::cout << "j = " << j << std::endl;
+
 }
